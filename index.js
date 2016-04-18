@@ -13,37 +13,39 @@ module.exports = (_config, cb) => {
     { maxAttempts: 5
     , type: 'application/json'
     , ttl: hour
-    }
+    };
   if (typeof _config === "string") {
     config.url = _config;
   } else {
     extend(config, _config);
   }
 
-  // Check the cache for the value
+  // Check the cache for the value. It's keyed by url.
   cache.get(config.url, (err, cached) => {
     if (err || cached === undefined) {
+      // If we got nothing there, then try the server.
       fetch(extend({}, config, ['maxAttempts', 'url', 'auth']), (err, body) => {
         if (err) {
-          cb(err)
+          cb(err);
         } else {
-          var answer = transform(body, config.type)
+          var answer = transform(body, config.type);
           cache.set(config.url, answer, config.ttl, (err) => {
-            cb(err, answer)
-          })
+            cb(err, answer);
+          });
         }
-      })
+      });
     } else {
-      cb(null, cached)
+      cb(null, cached);
     }
-
-  })
+  });
 }
 
+// Shallow extend for configs. keys_ is optional and allows you to choose
+// which properties you want.
 var extend = (reciever, provider, keys_) => {
-  var keys = keys_ || Object.keys(provider)
+  var keys = keys_ || Object.keys(provider);
   for (var i = keys.length; i--;) {
     if (provider[keys[i]] !== undefined) reciever[keys[i]] = provider[keys[i]];
   }
-  return reciever
+  return reciever;
 }
