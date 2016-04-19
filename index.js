@@ -9,6 +9,7 @@ const hour = 60*60;
 // the first success. Process the data via any config hooks. Cache the new
 // result. Failing all that, pass on an error.
 module.exports = (_config, cb) => {
+
   var config =
     { maxAttempts: 5
     , type: 'application/json'
@@ -21,7 +22,7 @@ module.exports = (_config, cb) => {
   }
 
   // Check the cache for the value. It's keyed by url.
-  cache.get(config.url, (err, cached) => {
+  cache.get(config.url + config.type, (err, cached) => {
     if (err || cached === undefined) {
       // If we got nothing there, then try the server.
       fetch(extend({}, config, ['maxAttempts', 'url', 'auth']), (err, body) => {
@@ -29,7 +30,7 @@ module.exports = (_config, cb) => {
           cb(err);
         } else {
           var answer = transform(body, config.type);
-          cache.set(config.url, answer, config.ttl, (err) => {
+          cache.set(config.url + config.type, answer, config.ttl, (err) => {
             cb(err, answer);
           });
         }
@@ -39,6 +40,8 @@ module.exports = (_config, cb) => {
     }
   });
 }
+
+module.exports.register = transform.register
 
 // Shallow extend for configs. keys_ is optional and allows you to choose
 // which properties you want.

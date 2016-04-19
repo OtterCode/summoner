@@ -44,17 +44,22 @@ tape('Integration test', (main) => {
   })
 
   main.test('- Alternate format tests', (t) => {
-    t.plan(1)
+    t.plan(2)
     summoner(plain, (err, res) => {
       var text = "This is just plain text. It's nothing special...\n"
       t.equal(res, text, "Plain text stored as string.")
     })
+    summoner.register('custom', (body) => JSON.parse(body).name.toUpperCase());
+    summoner({url: json, type: 'custom'}, (err, res) => {
+      t.equal(res, "THIS IS JSON", 'Custom transformations.')
+    })
   })
 
   main.test('- Errors', (t) => {
-    t.plan(5)
+    t.plan(6)
     summoner('http://localhost:7070/endpoints/nonexistant.json', (err, res) => {
       t.ok(err, "Errors on 404")
+      t.equal(res, undefined, "Undefined on 404")
     })
 
     summoner('http://localhost:0/not/really/gonna/get/a/response/i/hope',(err, res)=>{
