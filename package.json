@@ -1,6 +1,6 @@
 {
   "name": "summoner",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A caching http requester for consuming APIs on the server.",
   "main": "index.js",
   "scripts": {
